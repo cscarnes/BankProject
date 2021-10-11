@@ -44,16 +44,13 @@ public class AccountActions {
 
     public static int login(String username, String password) throws SQLException
     {
-
         int loginStatus = 0;
         String comparer = username + password;
         String retrievedUsername;
-        //String retrievedPassword;
 
         retrievedUsername = "SELECT username, password FROM checking_account WHERE username = '" + username + "' AND password = '" + password + "'";
         statement = connection.createStatement();
         result = statement.executeQuery(retrievedUsername);
-        //result1 = statement.executeQuery(retrievedPassword);
         while(result.next())
         {
             System.out.println(result.getString("username"));
@@ -61,7 +58,6 @@ public class AccountActions {
                 loginStatus = 1;
             }
         }
-
         return loginStatus;
     }
 
@@ -151,9 +147,6 @@ public class AccountActions {
         statement = connection.createStatement();
         // 4) Storing & Processing the Result (ResultSet[I])
         result = statement.executeQuery(query);
-       // while (result.next()) {
-         //   return result.getInt("id");
-        //}
         while(result.next()) {
             id = result.getInt("id");
         }

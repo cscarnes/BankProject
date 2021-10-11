@@ -14,7 +14,7 @@ public class Main {
         boolean loggedIn = false;
         int accountType = 0;
         Account account = new Account();
-        final Pattern pattern = Pattern.compile("^[A-Za-z,]++$");
+        final Pattern pattern = Pattern.compile("^[A-Za-z,.<>?!@#$%^&*()_+=-]++$");
 
         while (flag == 0) {
             System.out.println("******Welcome to your Personal Banking System******\n");
@@ -25,7 +25,7 @@ public class Main {
 
             if(!option.equals("1") && !option.equals("2") && !option.equals("3"))
             {
-                System.out.println("Invalid choice\n\n\n");
+                System.out.println("Please enter a valid selection\n\n\n");
             }
 
 
@@ -39,11 +39,7 @@ public class Main {
                         if (AccountActions.login(account.getUserName(), account.getPassword()) == 1){
                             loggedIn = true;
                         }
-                        /*
-                        if (!pattern.matcher(account.getPassword()).matches()) {
-                            System.out.println("Invalid Password");
-                        }
-                         */
+
                         if(loggedIn)
                         {
                             while(loggedIn)
@@ -99,6 +95,8 @@ public class Main {
                         accountType = input.nextInt();
                         switch (accountType) {
                             case 1:
+                                String username;
+                                String password;
                                 System.out.println("Enter your first name");
                                 account.setFirstName(input.next());
                                 System.out.println("Enter your last name");
@@ -108,8 +106,15 @@ public class Main {
                                 System.out.println("Create your username");
                                 account.setUserName(input.next());
                                 AccountActions.verifyUsername(account.getUserName());
-                                System.out.println("Create your password");
-                                account.setPassword(input.next());
+                                System.out.println("Create your password (must be at least 8 characters long)");
+                                System.out.println("Passwords can contain be any alphanumeric character or the special characters" +
+                                        ",.<>?!@#$%^&*()_+=-");
+                                password = input.next();
+                                while (!pattern.matcher(password).matches() || password.length() < 8) {
+                                    System.out.println("Invalid Password");
+                                    password = input.next();
+                                }
+                                account.setPassword(password);
                                 AccountActions.createCheckingAccount(account.getFirstName(), account.getLastName(),
                                         account.getEmail(), account.getUserName(), account.getPassword());
                                 break;
