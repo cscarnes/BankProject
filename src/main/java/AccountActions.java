@@ -107,6 +107,11 @@ public class AccountActions {
 
     }
 
+    public static void viewTransactionHistory()
+    {
+
+    }
+
     public static int update(String username) throws Exception {
 
         String updateQuery = "UPDATE `employee` SET `name` = ?,`email` = ? WHERE `id` = ?;"; // creating a query

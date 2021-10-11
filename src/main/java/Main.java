@@ -10,9 +10,9 @@ public class Main {
 
         int flag = 0;
         Scanner input = new Scanner(System.in);
-        String option = "";
+        String option;
         boolean loggedIn = false;
-        int accountType = 0;
+        int accountType;
         Account account = new Account();
         final Pattern pattern = Pattern.compile("^[A-Za-z,.<>?!@#$%^&*()_+=-]++$");
 
