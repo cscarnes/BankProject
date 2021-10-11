@@ -42,43 +42,73 @@ public class AccountActions {
         return insertStatus;
     }
 
-    public static void viewBalance(String username, String password) throws Exception {
+    public static int login(String username, String password) throws SQLException
+    {
 
-        String retrieveBalance = "SELECT `balance` FROM checking_account WHERE username=" + username + " AND password ="  + password;
-        //String query = "select * from employee where id=" + id;
+        int loginStatus = 0;
+        String comparer = username + password;
+        String retrievedUsername;
+        //String retrievedPassword;
+
+        retrievedUsername = "SELECT username, password FROM checking_account WHERE username = '" + username + "' AND password = '" + password + "'";
+        statement = connection.createStatement();
+        result = statement.executeQuery(retrievedUsername);
+        //result1 = statement.executeQuery(retrievedPassword);
+        while(result.next())
+        {
+            System.out.println(result.getString("username"));
+            if((result.getString("username") + result.getString("password")).equals(comparer)) {
+                loginStatus = 1;
+            }
+        }
+
+        return loginStatus;
+    }
+
+    public static double viewBalance(String username, String password) throws Exception {
+        double balance = 0;
+        String retrieveBalance = "SELECT `balance` FROM checking_account WHERE username = '" +
+                username + "' AND password = '"  + password + "'";
         statement = connection.createStatement();
         // 4) Storing & Processing the Result (ResultSet[I])
         result = statement.executeQuery(retrieveBalance);
-        System.out.println("ID \t Name \t\t Email");
         while (result.next()) {
-            System.out.println(result.getInt("id") + "\t" + result.getString(2) + "\t \t" + result.getString(3));
+            balance = result.getDouble("balance");
         }
+        return balance;
     }
 
-    public static int makeDeposit(double deposit) throws Exception {
-
-        String updateQuery = "UPDATE `employee` SET `name` = ?,`email` = ? WHERE `id` = ?;"; // creating a query
-        preparedStmt = connection.prepareStatement(updateQuery); // creating prepared Statement
-        preparedStmt.setInt(3, 101);
-        preparedStmt.setString(1, "abc123");
-        preparedStmt.setString(2, "abc123@gmail.com");
-
+    public static int makeDeposit(double deposit, String username) throws Exception {
+        int id = AccountActions.findId(username);
+        String updateQuery = "UPDATE checking_account SET balance = balance + '" + deposit +
+                "' WHERE username = '" + username + "' AND `id` = '" + id + "'"; // creating a query
+        statement = connection.createStatement(); // creating prepared Statement
         int updateStatus = 0;
-        updateStatus = preparedStmt.executeUpdate();
+        updateStatus = statement.executeUpdate(updateQuery);
         return updateStatus;
     }
 
-    public static int makeWithdrawal(double withdrawal) throws Exception {
-
-        String updateQuery = "UPDATE `employee` SET `name` = ?,`email` = ? WHERE `id` = ?;"; // creating a query
-        preparedStmt = connection.prepareStatement(updateQuery); // creating prepared Statement
-        preparedStmt.setInt(3, 101);
-        preparedStmt.setString(1, "abc123");
-        preparedStmt.setString(2, "abc123@gmail.com");
-
+    public static int makeWithdrawal(double withdrawal, String username) throws Exception {
+        int id = AccountActions.findId(username);
+        String updateQuery = "UPDATE checking_account SET balance = balance - '" + withdrawal +
+                "' WHERE username = '" + username + "' AND `id` = '" + id + "'"; // creating a query
+        statement = connection.createStatement(); // creating prepared Statement
         int updateStatus = 0;
-        updateStatus = preparedStmt.executeUpdate();
+        updateStatus = statement.executeUpdate(updateQuery);
         return updateStatus;
+    }
+
+    public static void verifyUsername(String username) throws SQLException {
+        String verifyQuery = "SELECT `username` FROM checking_account WHERE `username` = '" + username + "'";
+        statement = connection.createStatement();
+        result = statement.executeQuery(verifyQuery);
+        while(result.next())
+        {
+            if (result.getString("username").equals(username)) {
+                System.out.println("Username already in use");
+            }
+        }
+
     }
 
     public static int update(String username) throws Exception {
@@ -115,15 +145,19 @@ public class AccountActions {
         }
     }
 
-    public static void findById(int id) throws Exception {
-        String query = "select * from employee where id=" + id;
+    public static int findId(String username) throws Exception {
+        String query = "select id from checking_account" +  " where username = '" + username + "'";
+        int id = 0;
         statement = connection.createStatement();
         // 4) Storing & Processing the Result (ResultSet[I])
         result = statement.executeQuery(query);
-        System.out.println("ID \t Name \t\t Email");
-        while (result.next()) {
-            System.out.println(result.getInt("id") + "\t" + result.getString(2) + "\t \t" + result.getString(3));
+       // while (result.next()) {
+         //   return result.getInt("id");
+        //}
+        while(result.next()) {
+            id = result.getInt("id");
         }
+        return id;
     }
 
     public static void closeResource() throws Exception {
