@@ -3,7 +3,8 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 public class Main {
-
+    static final String CHECKING_ACCOUNT = "1";
+    static final String SAVINGS_ACCOUNT = "2";
 
     public static void main(String[] args) throws Exception {
         AccountActions.connect();
@@ -14,7 +15,7 @@ public class Main {
         boolean loggedIn = false;
         int accountType;
         Account account = new Account();
-        final Pattern pattern = Pattern.compile("^[A-Za-z,.<>?!@#$%^&*()_+=-]++$");
+        final Pattern pattern = Pattern.compile("^[A-Za-z,.<>?!@#$%^&*()_+={}-]++$");
 
         while (flag == 0) {
             System.out.println("******Welcome to your Personal Banking System******\n");
@@ -36,8 +37,12 @@ public class Main {
                         account.setUserName(input.next());
                         System.out.println("Enter your password");
                         account.setPassword(input.next());
-                        if (AccountActions.login(account.getUserName(), account.getPassword()) == 1){
+                        if (AccountActions.login(account.getUserName(), account.getPassword()).equals("checking_account")
+                                || AccountActions.login(account.getUserName(), account.getPassword()).equals("savings_account")){
                             loggedIn = true;
+                        }
+                        else{
+                            System.out.println("Account does not exist");
                         }
 
                         if(loggedIn)
@@ -52,7 +57,6 @@ public class Main {
                                 choice = input.nextInt();
                                 switch (choice) {
                                     case 1:
-                                        System.out.println(AccountActions.findId(account.getUserName()));
                                         System.out.println("Enter amount to deposit");
                                         double depositAmount = input.nextDouble();
                                         while (depositAmount < 0 || depositAmount > 10000)
@@ -60,7 +64,7 @@ public class Main {
                                             System.out.println("Invalid amount");
                                             depositAmount = input.nextDouble();
                                         }
-                                        AccountActions.makeDeposit(depositAmount, account.getUserName());
+                                        AccountActions.makeDeposit(depositAmount, account.getUserName(), account.getPassword());
                                         break;
                                     case 2:
                                         System.out.println("Enter amount to withdraw");
@@ -70,7 +74,7 @@ public class Main {
                                             System.out.println("Invalid amount");
                                             withdrawalAmount = input.nextDouble();
                                         }
-                                        AccountActions.makeWithdrawal(input.nextDouble(), account.getUserName());
+                                        AccountActions.makeWithdrawal(withdrawalAmount, account.getUserName(), account.getPassword());
                                         break;
                                     case 3:
                                         System.out.println("Balance");
@@ -95,8 +99,6 @@ public class Main {
                         accountType = input.nextInt();
                         switch (accountType) {
                             case 1:
-                                String username;
-                                String password;
                                 System.out.println("Enter your first name");
                                 account.setFirstName(input.next());
                                 System.out.println("Enter your last name");
@@ -105,16 +107,19 @@ public class Main {
                                 account.setEmail(input.next());
                                 System.out.println("Create your username");
                                 account.setUserName(input.next());
-                                AccountActions.verifyUsername(account.getUserName());
+                                while(!AccountActions.verifyUsername(account.getUserName()))
+                                {
+                                    System.out.println("Username is already used");
+                                    account.setUserName(input.next());
+                                }
                                 System.out.println("Create your password (must be at least 8 characters long)");
                                 System.out.println("Passwords can contain be any alphanumeric character or the special characters" +
-                                        ",.<>?!@#$%^&*()_+=-");
-                                password = input.next();
-                                while (!pattern.matcher(password).matches() || password.length() < 8) {
+                                        ",.<>?!@#$%^&*()_+=-{}");
+                                account.setPassword(input.next());
+                                while (!pattern.matcher(account.getPassword()).matches() || account.getPassword().length() < 8) {
                                     System.out.println("Invalid Password");
-                                    password = input.next();
+                                    account.setPassword(input.next());
                                 }
-                                account.setPassword(password);
                                 AccountActions.createCheckingAccount(account.getFirstName(), account.getLastName(),
                                         account.getEmail(), account.getUserName(), account.getPassword());
                                 break;
