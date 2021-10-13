@@ -8,6 +8,7 @@ public class AccountActions {
     private static ResultSet result = null;
 
     public static void connect() throws ClassNotFoundException, SQLException {
+        // includes mysql driver
         Class.forName("com.mysql.cj.jdbc.Driver");
         connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/bank_db", "root", "root");
     }
@@ -44,6 +45,7 @@ public class AccountActions {
         return insertStatus;
     }
 
+    //login returns string value if logged in to a checking or savings account
     public static String login(String username, String password) throws Exception
     {
         statement = connection.createStatement();
@@ -69,7 +71,7 @@ public class AccountActions {
 
         return accountType;
     }
-
+    //view balance field in checking_account and savings_account tables
     public static double viewBalance(String username, String password) throws Exception {
         double balance = 0;
         String account = "";
@@ -91,47 +93,61 @@ public class AccountActions {
         return balance;
     }
 
+    //adds amount to balance field
     public static void makeDeposit(double deposit, String username, String password) throws Exception {
         String account = "";
+        String transactionAccount = "";
         if (login(username, password).equals("checking_account"))
         {
             account = "checking_account";
+            transactionAccount = "checking_account_transaction";
         }
         if (login(username, password).equals("savings_account"))
         {
             account = "savings_account";
+            transactionAccount = "savings_account_transaction";
         }
         int id = AccountActions.findId(username, password);
         String makeDeposit = "UPDATE " + account + " SET balance = balance + '" + deposit +
                 "' WHERE username = '" + username + "' AND `id` = '" + id + "'";
-
-        //String transactionRecord = "INSERT INTO checking_account_transaction ("
+        //inserts record into checking_account_transaction or savings_account_transaction
+        String transactionRecord = "INSERT INTO " + transactionAccount + " (account_id, transaction_amount, transaction_date) VALUES ("
+                + findId(username, password) + ", " + deposit + ", CURRENT_TIMESTAMP)";
         statement = connection.createStatement();
+        //verifies account and makes transaction
         if(login(username, password).equals(account)) {
             statement.executeUpdate(makeDeposit);
+            statement.executeUpdate(transactionRecord);
         }
 
     }
-
+    // subtracts amount from balance field
     public static void makeWithdrawal(double withdrawal, String username, String password) throws Exception {
         int id = AccountActions.findId(username, password);
         String account = "";
+        String transactionAccount = "";
         if (login(username, password).equals("checking_account"))
         {
             account = "checking_account";
+            transactionAccount = "checking_account_transaction";
         }
         if (login(username, password).equals("savings_account"))
         {
             account = "savings_account";
+            transactionAccount = "savings_account_transaction";
         }
         String withdraw = "UPDATE " + account + " SET balance = balance - '" + withdrawal +
-                "' WHERE username = '" + username + "' AND `id` = '" + id + "'"; // creating a query
+                "' WHERE username = '" + username + "' AND `id` = '" + id + "'";
+        //inserts record into checking_account_transaction or savings_account_transaction
+        String transactionRecord = "INSERT INTO " + transactionAccount + " (account_id, transaction_amount, transaction_date) VALUES ("
+                + findId(username, password) + ", " + withdrawal + ", CURRENT_TIMESTAMP)";
         statement = connection.createStatement();
         if(login(username, password).equals(account)) {
             statement.executeUpdate(withdraw);
+            statement.executeUpdate(transactionRecord);
         }
     }
-
+    //verifies that entered username is unique
     public static boolean verifyUsername(String username) throws SQLException {
         boolean usernameIsUnique = true;
         String checkingUsername = "SELECT `username` FROM checking_account WHERE `username` = '" + username + "'";
@@ -155,36 +171,30 @@ public class AccountActions {
         }
         return usernameIsUnique;
     }
-
-    public static void viewTransactionHistory()
-    {
-        String viewQuery = "SELECT ";
-    }
-
-    public static int update(String username) throws Exception {
-
-        String updateQuery = "UPDATE `employee` SET `name` = ?,`email` = ? WHERE `id` = ?;"; // creating a query
-        preparedStmt = connection.prepareStatement(updateQuery); // creating prepared Statement
-        preparedStmt.setInt(3, 101);
-        preparedStmt.setString(1, "abc123");
-        preparedStmt.setString(2, "abc123@gmail.com");
-
-        int updateStatus = 0;
-        updateStatus = preparedStmt.executeUpdate();
-        return updateStatus;
-    }
-
-    public static void findAll() throws Exception {
-        String query = "select * from employee";
-        statement = connection.createStatement();
-        // 4) Storing & Processing the Result (ResultSet[I])
-        result = statement.executeQuery(query);
-        System.out.println("ID \t Name \t\t Email");
-        while (result.next()) {
-            System.out.println(result.getInt("id") + "\t" + result.getString(2) + "\t \t" + result.getString(3));
+    // view transaction records
+    public static void viewTransactionHistory(String username, String password) throws Exception {
+        String account = "";
+        if (login(username, password).equals("checking_account"))
+        {
+            account = "checking_account_transaction";
         }
-    }
+        if (login(username, password).equals("savings_account"))
+        {
+            account = "savings_account_transaction";
+        }
+        int id = findId(username, password);
+        String viewQuery = "SELECT transaction_date, transaction_amount FROM " + account + " WHERE account_id = "
+                + id;
+        statement = connection.createStatement();
+        result = statement.executeQuery(viewQuery);
+        while (result.next())
+        {
+            System.out.println(result.getString("transaction_date") + result.getString("transaction_amount")
+            + "\n\n");
+        }
 
+    }
+    // find account id in savings and checking tables from username and password
     public static int findId(String username, String password) throws Exception {
         String account = "";
         if (login(username, password).equals("checking_account"))
@@ -221,7 +231,6 @@ public class AccountActions {
         }
 
     }
-
 
 
         }

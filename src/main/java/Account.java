@@ -1,3 +1,4 @@
+//container class for holding account variables
 public class Account {
     private String userName = "";
     private String password = "";
