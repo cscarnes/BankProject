@@ -33,7 +33,7 @@ public class AccountActions {
                                            String username, String password) throws SQLException {
         int insertStatus = 0;
         String insertQuery = "INSERT INTO savings_account (`first_name`,`last_name`, `email`, `username`, `password`" +
-                ") VALUES (?,?,?,?,?);";
+                ") VALUES (?,?,?,?,?,?);";
         preparedStmt = connection.prepareStatement(insertQuery);
 
         preparedStmt.setString(1, firstName);
@@ -208,28 +208,12 @@ public class AccountActions {
         String query = "select id from " + account +  " where username = '" + username + "'";
         int id = 0;
         statement = connection.createStatement();
-        // 4) Storing & Processing the Result (ResultSet[I])
+
         result = statement.executeQuery(query);
         while(result.next()) {
             id = result.getInt("id");
         }
         return id;
-    }
-
-    public static void closeResource() throws Exception {
-        if (result != null) {
-            result.close();
-        }
-        if (preparedStmt != null) {
-            preparedStmt.close();
-        }
-        if (statement != null) {
-            statement.close();
-        }
-        if (connection != null) {
-            connection.close();
-        }
-
     }
 
 
